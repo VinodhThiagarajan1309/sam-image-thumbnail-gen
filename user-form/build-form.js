@@ -10,7 +10,7 @@ module.exports = function buildform(form) {
         <body>
             <form action="${form.url}" method="post" enctype="multipart/form-data">
                 ${fields} 
-                Select a JPG File:
+                Select an image File:
                 <input type="file" name="file" accept="image/png, image/jpeg , image/jpg, image/gif"/> </br>
                 <input type="submit" name="submit" value="Upload File"/>       
             </form>

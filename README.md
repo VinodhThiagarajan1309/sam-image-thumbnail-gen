@@ -1,120 +1,425 @@
-# app
+# Server Less Application Model
 
-This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
+## Build Sample App:
 
-- hello-world - Code for the application's Lambda function.
-- events - Invocation events that you can use to invoke the function.
-- hello-world/tests - Unit tests for the application code. 
-- template.yaml - A template that defines the application's AWS resources.
+[https://aws.amazon.com/serverless/build-a-web-app/](https://aws.amazon.com/serverless/build-a-web-app/)
 
-The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
+## Server-less Link:
 
-If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
-The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
+[https://aws.amazon.com/serverless/](https://aws.amazon.com/serverless/)
 
-* [PyCharm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [IntelliJ](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [VS Code](https://docs.aws.amazon.com/toolkit-for-vscode/latest/userguide/welcome.html)
-* [Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/welcome.html)
+## Spec Link:
 
-## Deploy the sample application
+[https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)
 
-The Serverless Application Model Command Line Interface (SAM CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+## Contribution:
 
-To use the SAM CLI, you need the following tools.
+[https://github.com/aws/aws-toolkit-jetbrains/issues/1649](https://github.com/aws/aws-toolkit-jetbrains/issues/1649)
 
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* Node.js - [Install Node.js 10](https://nodejs.org/en/), including the NPM package management tool.
-* Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
+## Available SAM Resources
 
-To build and deploy your application for the first time, run the following in your shell:
+![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled.png)
 
-```bash
+## Will be initially learning
+
+```makefile
+AWS::Serverless::Api - Common Name - ApiGateway
+AWS::Serverless::Application
+AWS::Serverless::Function - Common Name - Lambda
+~~AWS::Serverless::HttpApi ( Api is Enough for now)~~
+AWS::Serverless::LayerVersion
+AWS::Serverless::SimpleTable
+~~AWS::Serverless::StateMachine ( Right Now Not Learning Step Functions)~~
+```
+
+## Very Basic SAM Template
+
+```java
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  set of globals
+
+Description:
+  String
+
+Metadata:
+  template metadata
+
+Parameters:
+  set of parameters
+
+Mappings:
+  set of mappings
+
+Conditions:
+  set of conditions
+
+Resources:
+  set of resources
+
+Outputs:
+  set of outputs
+```
+
+## Organize Later
+
+- AWS::Serverless::Api - This is what you need and not the HTTP Api - Right now the difference I know is that HTTP doesn't mention connecting to other AWS Services other than Lambda while Api does and REST  is HTTPS
+- Link to upgrade Swagger for AWS - [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-api-gateway-extensions.html](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-api-gateway-extensions.html)
+- [https://github.com/Mermade/openapi-gui](https://github.com/Mermade/openapi-gui)
+- We see `/Prod` because SAM automatically creates this stage and add it - the right term to use here is `implicit API` , since we have this API configured in the Event property of the Lambda, hence the name.
+- Talk about cold starts // TODO
+- `context.awsRequestId` is a useful uuid that help track lambda calls // TODO
+- Mention about capturing outputs // TODO
+- Talk about Timeout // TODO
+- When creating subfolders in the main sam folder alway run `npm init --yes` and then begin the code. // TODO
+- Lambda Retries - We can use the `MaximumRetryAttempts and MinimumRetryAttempts` parameters with `EventInvokeConfiguration` in SAM
+
+### Sam Command
+
+```makefile
+### Build, Package and Ship
+
 sam build
-sam deploy --guided
+sam package --s3-bucket sam-app-dep --output-template-file output.yaml
+sam deploy --template-file output.yaml --stack-name sam-test-1 --capabilities CAPABILITY_IAM
+
+### Get Live Logs For the Stack
+sam logs -n HelloWorldFunction --stach-name sam-test-1 --tail
+
+### Local Test an API
+sam local start-api
+http://127.0.0.1:3000/hello/ - Skip the Stage name here
+
+### Local Test a LAMBDA which doesn't have a API end point
+sam local invoke HelloWorldFunction --event events/event.json
+( Capture the event in using the logging, then tail using the tail command, get the sample event , store it in events.json file and then invoke the above command)
+
+### Debug Lambda, right now supports, Go, Python and Nodejs
+sam local invoke HelloWorldFunction --event events/event.json -d 8070
+(use chrome://inspect command )
+Use the 
+Use the `Command + P` option and look for the file and in our case it is app.js
+Use the watch option and add the variables you want to add in there
+
+Gives you an idea like this
+
+REPORT RequestId: a3a29263-236a-1759-6d1f-b899f2d93946  Init Duration: 31695.98 ms      Duration: 210765.62 ms  Billed Duration: 210800 ms      Memory Size: 128 MB     Max Memory Used: 43 MB
 ```
 
-The first command will build the source of your application. The second command will package and deploy your application to AWS, with a series of prompts:
+Step 1
 
-* **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-* **AWS Region**: The AWS region you want to deploy your app to.
-* **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-* **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modified IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-* **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
+![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%201.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%201.png)
 
-You can find your API Gateway Endpoint URL in the output values displayed after deployment.
+Step 2
 
-## Use the SAM CLI to build and test locally
+![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%202.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%202.png)
 
-Build your application with the `sam build` command.
+### Linting
 
-```bash
-app$ sam build
+Install 
+
+```makefile
+pip3 install cfn-lint
+
+Then run 
+
+cfn-lint 
+
+Dont forget YAMLLINT
+
+sam validate
 ```
 
-The SAM CLI installs dependencies defined in `hello-world/package.json`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+## Lambda
 
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
+```makefile
+ # To get a lambda function configuration
+aws lambda get-function-configuration --function-name sam-test-1-HelloWorldFunction-85U89D3XIR6D
 
-Run functions locally and invoke them with the `sam local invoke` command.
+# To get the physical resource id mentioned in the above line, List the stack resources 
+aws cloudformation list-stack-resources --stack-name sam-test-1
 
-```bash
-app$ sam local invoke HelloWorldFunction --event events/event.json
+# To get the latest version
+aws lambda get-function-configuration --function-name sam-test-1-HelloWorldFunction-85U89D3XIR6D --output text --query Version ( remember the quey language from chapter 3) 
+
 ```
 
-The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
+## Lambda Alias
 
-```bash
-app$ sam local start-api
-app$ curl http://localhost:3000/
+Achieved using the `AutoPublishAlias` property and you can name it anything like `dev`, `stage` and `prod`
+
+```makefile
+HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Linear10PercentEvery1Minute
 ```
 
-The SAM CLI reads the application template to determine the API's routes and the functions that they invoke. The `Events` property on each function's definition includes the route and method for each path.
+```makefile
+## To list all the versions of the given lambda
+aws lambda list-versions-by-function --function-name sam-test-1-HelloWorldFunction-85U89D3XIR6D
+```
 
-```yaml
+> so when you create a Lambda and assign an API event invocation, the API(event) will call the alias/recent version. This happens because they in the same template.yaml. But if you want to call it from outside then you can include the version name following the function name like `sam-test-1-HelloWorldFunction-85U89D3XIR6D:4` the 4 here  the version of the Lambda we would like to call
+
+### Invoke Any version of Lambda
+
+```makefile
+aws lambda invoke --function-name sam-test-1-HelloWorldFunction-85U89D3XIR6D:2 output.txt
+```
+
+### Gradual Deployment
+
+Achieved using `DeploymentPreference` property
+
+Useful Links:
+
+- [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/automating-updates-to-serverless-apps.html](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/automating-updates-to-serverless-apps.html)
+- [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-deploymentpreference.html](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-deploymentpreference.html)
+
+```makefile
+HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Linear10PercentEvery1Minute
+
+```
+
+## Code Deploy Console
+
+![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%203.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%203.png)
+
+![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%204.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%204.png)
+
+## Cloud Watch alarm setting
+
+- Helps during Gradual deployment
+- Raises alarm if things go
+- Set up an alarm and assign the same to Lambda deployment
+- Can also set up custom metrics using Math and come up with alarms like,
+    - Drop in Sales
+    - Or Decreased LIKES
+
+```makefile
+## Setting up the alarm
+HelloWorldErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      MetricName: Errors
+      Statistic: Sum
+      ComparisonOperator: GreaterThanThreshold
+      Threshold: 5
+      Period: 60
+      EvaluationPeriods: 1
+      TreatMissingData: notBreaching
+      Namespace: AWS/Lambda
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref HelloWorldFunction
+```
+
+Mapping the alarm to the Lambda function during deployment
+
+```makefile
+HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Linear10PercentEvery1Minute
+        Alarms:
+          - !Ref HelloWorldErrors
       Events:
         HelloWorld:
-          Type: Api
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /hello
             Method: get
 ```
 
-## Add a resource to your application
-The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
+### More on DeploymentPreference
 
-## Fetch, tail, and filter Lambda function logs
+DeploymentPreference also has the following properties
 
-To simplify troubleshooting, SAM CLI has a command called `sam logs`. `sam logs` lets you fetch logs generated by your deployed Lambda function from the command line. In addition to printing the logs on the terminal, this command has several nifty features to help you quickly find the bug.
+- `Hooks` - Execute Pre and Post deployment Lambda
 
-`NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
+    ```makefile
+    Hooks:
+      PreTraffic:
+        Ref: PreTrafficLambdaFunction
+      PostTraffic:
+        Ref: PostTrafficLambdaFunction
+    ```
 
-```bash
-app$ sam logs -n HelloWorldFunction --stack-name app --tail
+### API Gateway
+
+So when you configure the event in the Lambda for API we get something called as Implicit API, this is the one that gives `/Prod` as the default stage, but if you want to have more control over this then we need to go for the SAM resource `AWS::Serverless::Api` resource and you can refer them in the Lambda using the `RestApiId` property like below
+
+```makefile
+WebApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref AppStage
+
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      AutoPublishAlias: live
+      #DeploymentPreference:
+        #Type: Linear10PercentEvery1Minute
+        #Alarms:
+          #- !Ref HelloWorldErrors
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: get
+            RestApiId: !Ref WebApi
+        Submission:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /hello
+            Method: post
+            RestApiId: !Ref WebApi
 ```
 
-You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
+## Parameters Usage
 
-## Unit tests
+We can also override the default `/Prod` using the `Parameter` template and refer to the usage of `AppStage` above,
 
-Tests are defined in the `hello-world/tests` folder in this project. Use NPM to install the [Mocha test framework](https://mochajs.org/) and run unit tests.
-
-```bash
-app$ cd hello-world
-hello-world$ npm install
-hello-world$ npm run test
+```makefile
+Parameters:
+  AppStage:
+    Type: String
+    Default: api
 ```
 
-## Cleanup
+Also we can override this parameter when you call the `sam deploy` using the following option `--parameter-overrides` AppStage = api AppName=Demo.
 
-To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
+We can also add more constraints that restricts these parameter values ( like the name can be only numerical etc)
 
-```bash
-aws cloudformation delete-stack --stack-name app
+## Generating Test Events
+
+When you want to write test cases and you want to know how a test will look like
+
+```makefile
+sam local generate-event --help
 ```
 
-## Resources
+### Dealing with bad messages
 
-See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
+This is called dead letter queue config
 
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+- SQS - Batch
+- SNS  - Instant
+
+The Lambda Terminology to be used is called Lambda Destinations (from November 2019 onwards)
+
+Use the Dead Letter Queue Property `DeadLetterQueue`
+
+Sample 
+
+```makefile
+ConvertFileFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: image-conversion/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      AutoPublishAlias: live
+        #DeploymentPreference:
+        #Type: Linear10PercentEvery1Minute
+      #Alarms:
+      #- !Ref HelloWorldErrors
+      Events:
+        FileUploaded:
+          Type: S3 # More info about API Event Source: https://github
+          Properties:
+            Bucket: !Ref UploadS3Bucket
+            Events: s3:ObjectCreated:*
+      Timeout: 600
+      Environment:
+        Variables:
+          OUTPUT_BUCKET: !Ref ThumbnailsS3Bucket
+      Policies:
+        - S3FullAccessPolicy:
+            BucketName: !Ref ThumbnailsS3Bucket
+      DeadLetterQueue:
+        Type: SNS
+        TargetArn: !Ref NotifyAdmins
+```
+
+```makefile
+## This is the setup to receive the Lambda errors
+NotifyAdmins:
+    Type: AWS::SNS::Topic
+```
+
+## Reduce Email Noice using Conditional resources
+
+- Setup Conditional Parameters
+
+```makefile
+ContactEmailAddress:
+  Type: String
+  Description: Email address for operational notifications
+  Default: ''
+```
+
+- Setup Condition based on the parameter
+
+```makefile
+Conditions:
+  ContactEmailSet: !Not [ !Equals ['', !Ref ContactEmailAddress]]
+
+```
+
+- Map this condition against a resource
+
+```makefile
+AlarmNotifyOpsSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: ContactEmailSet
+    Properties:
+      EndPoint: !Ref ContactEmailAddress
+      Protocol: emai;
+      TopicArn: !Ref NotifyAdmins
+```
+
+- During deploy set this Parameter
+
+Post effects of the above steps
+
+![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%205.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%205.png)
+
+Confirm it
+
+![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%206.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%206.png)
+
+When Deploying we can override the parameters like this
+
+```makefile
+sam deploy --template-file output.yaml --stack-name sam-test-1 --capabilities CAPABILITY_IAM --parameter-overrides ContactEmailAddress=myemail@gmail.com
+```
+
+Create an error and expect a mail like this
+
+![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%207.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%207.png)

@@ -62,7 +62,7 @@ Resources:
   ShowFormFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://sam-app-dep/07599e57f24720790f2723d9e9cf1a95
+      CodeUri: s3://sam-app-dep/0ce239a0ccd94c7360a73688a40c987f
       Handler: show-form.lambdaHandler
       Runtime: nodejs12.x
       AutoPublishAlias: live
@@ -87,7 +87,7 @@ Resources:
   ConfirmUploadFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://sam-app-dep/4f33a170391bdab2108d4594848e11c3
+      CodeUri: s3://sam-app-dep/f1cdc5e76782f51bf43e23353f2c33a9
       Handler: confirm-upload.lambdaHandler
       Runtime: nodejs12.x
       AutoPublishAlias: live
