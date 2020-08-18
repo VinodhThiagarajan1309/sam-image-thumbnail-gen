@@ -22,6 +22,12 @@ Parameters:
     Type: String
     Description: Email address for operational notifications
     Default: ''
+  ThumbnailWidth:
+    Type: Number
+    Default: 300
+    Description: Thumbnail width in pixels
+    MinValue: 10
+    MaxValue: 1000
 Conditions:
   ContactEmailSet:
     Fn::Not:
@@ -110,7 +116,7 @@ Resources:
   ConvertFileFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://sam-app-dep/574176772e8180f4d5eea9a8247fd6f8
+      CodeUri: s3://sam-app-dep/a0523b036807bb4da4358db9338a941a
       Handler: index.handler
       Runtime: nodejs12.x
       AutoPublishAlias: live
@@ -122,10 +128,13 @@ Resources:
               Ref: UploadS3Bucket
             Events: s3:ObjectCreated:*
       Timeout: 600
+      MemorySize: 1024
       Environment:
         Variables:
           OUTPUT_BUCKET:
             Ref: ThumbnailsS3Bucket
+          THUMB_WIDTH:
+            Ref: ThumbnailWidth
       Policies:
       - S3FullAccessPolicy:
           BucketName:
@@ -134,6 +143,10 @@ Resources:
         Type: SNS
         TargetArn:
           Ref: NotifyAdmins
+      Layers:
+      - Fn::GetAtt:
+        - ImageMagick
+        - Outputs.LayerVersion
   ConvertFunctionCanReadUploads:
     Type: AWS::IAM::Policy
     Properties:
@@ -163,6 +176,12 @@ Resources:
       - Name: FunctionName
         Value:
           Ref: ShowFormFunction
+  ImageMagick:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location:
+        ApplicationId: arn:aws:serverlessrepo:us-east-1:145266761615:applications/image-magick-lambda-layer
+        SemanticVersion: 1.0.0
 Outputs:
   UserFormApi:
     Description: API Gateway endpoint URL for Prod stage for Hello World function
