@@ -1,0 +1,19 @@
+{
+  "Id": "Policy1597850307005",
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "Stmt1597850305713",
+      "Action": [
+        "s3:GetObject"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:s3:::sam-app-dep/*",
+      "Principal": {
+        "Service": [
+          "serverlessrepo.amazonaws.com"
+        ]
+      }
+    }
+  ]
+}

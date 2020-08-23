@@ -189,6 +189,13 @@ Resources:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:145266761615:applications/image-magick-lambda-layer
         SemanticVersion: 1.0.0
 
+  WebAssetsS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        ErrorDocument: 404.html
+        IndexDocument: index.html
+
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -206,3 +213,18 @@ Outputs:
   UploadBucket:
     Description: "S3 Bucket for user information"
     Value: !Ref UploadS3Bucket
+  WebUrl:
+    Description: "Public web URL"
+    Value: !GetAtt WebAssetsS3Bucket.WebsiteUR
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: image-thumbnail-gen-lambda-vinodh
+    Description: >
+      A application to build thumbnail from other images.
+    Author: Vinodh Thiagarajan
+    SpdxLicenseId: MIT
+    LicenseUrl: LICENSE.md
+    ReadmeUrl: README.md
+    Labels: ['layer', 'image', 'lambda', 'imagemagick']
+    SemanticVersion: 1.0.0

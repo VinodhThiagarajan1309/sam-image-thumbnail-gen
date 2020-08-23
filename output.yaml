@@ -203,3 +203,19 @@ Outputs:
     Description: S3 Bucket for user information
     Value:
       Ref: UploadS3Bucket
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: image-thumbnail-gen-lambda-vinodh
+    Description: 'A application to build thumbnail from other images.
+
+      '
+    Author: Vinodh Thiagarajan
+    SpdxLicenseId: MIT
+    LicenseUrl: s3://sam-app-dep/b1101be903428cec3d118f4496ad8c15
+    ReadmeUrl: s3://sam-app-dep/8fe62426aea04b3910b003174007d6dd
+    Labels:
+    - layer
+    - image
+    - lambda
+    - imagemagick
+    SemanticVersion: 1.0.0
