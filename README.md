@@ -423,3 +423,11 @@ sam deploy --template-file output.yaml --stack-name sam-test-1 --capabilities CA
 Create an error and expect a mail like this
 
 ![Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%207.png](Server%20Less%20Application%20Model%206c2c08e848fc4a7e8e0ab48c6d97e5c6/Untitled%207.png)
+
+## Commands for this project
+```
+sam build
+sam package --s3-bucket sam-app-dep --output-template-file output.yaml
+sam deploy --template-file output.yaml --stack-name sam-test-1 --capabilities CAPABILITY_IAM
+ CAPABILITY_AUTO_EXPAND --parameter-overrides ContactEmailAddress=xxxxxxx@gmail.com
+```
