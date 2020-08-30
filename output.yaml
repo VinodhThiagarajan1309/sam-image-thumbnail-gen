@@ -68,7 +68,7 @@ Resources:
   ShowFormFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://sam-app-dep/0ce239a0ccd94c7360a73688a40c987f
+      CodeUri: s3://sam-app-dep/d672b76a667b9887b00b9f8f709bb983
       Handler: show-form.lambdaHandler
       Runtime: nodejs12.x
       AutoPublishAlias: live
@@ -93,7 +93,7 @@ Resources:
   ConfirmUploadFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://sam-app-dep/f1cdc5e76782f51bf43e23353f2c33a9
+      CodeUri: s3://sam-app-dep/d418416fc6350d0cfa5a33baad090db5
       Handler: confirm-upload.lambdaHandler
       Runtime: nodejs12.x
       AutoPublishAlias: live
@@ -182,6 +182,12 @@ Resources:
       Location:
         ApplicationId: arn:aws:serverlessrepo:us-east-1:145266761615:applications/image-magick-lambda-layer
         SemanticVersion: 1.0.0
+  WebAssetsS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        ErrorDocument: 404.html
+        IndexDocument: index.html
 Outputs:
   UserFormApi:
     Description: API Gateway endpoint URL for Prod stage for Hello World function
@@ -203,6 +209,12 @@ Outputs:
     Description: S3 Bucket for user information
     Value:
       Ref: UploadS3Bucket
+  WebUrl:
+    Description: Public web URL
+    Value:
+      Fn::GetAtt:
+      - WebAssetsS3Bucket
+      - WebsiteURL
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: image-thumbnail-gen-lambda-vinodh

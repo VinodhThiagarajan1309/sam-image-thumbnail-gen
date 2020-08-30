@@ -215,7 +215,7 @@ Outputs:
     Value: !Ref UploadS3Bucket
   WebUrl:
     Description: "Public web URL"
-    Value: !GetAtt WebAssetsS3Bucket.WebsiteUR
+    Value: !GetAtt WebAssetsS3Bucket.WebsiteURL
 
 Metadata:
   AWS::ServerlessRepo::Application:
